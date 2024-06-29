@@ -1,0 +1,26 @@
+2024-06-29 04:35:14,762 INFO - Task context logging is enabled
+2024-06-29 04:35:14,763 INFO - Loaded executor: SequentialExecutor
+2024-06-29 04:35:14,856 INFO - Starting the scheduler
+2024-06-29 04:35:14,857 INFO - Processing each file at most -1 times
+2024-06-29 04:35:14,865 INFO - Launched DagFileProcessorManager with pid: 35532
+2024-06-29 04:35:14,866 INFO - Adopting or resetting orphaned tasks for active dag runs
+2024-06-29 04:35:14,872 INFO - Configured default timezone Timezone('UTC')
+2024-06-29 04:35:15,054 ERROR - Exception when executing SchedulerJob._run_scheduler_loop
+Traceback (most recent call last):
+  File "/home/ubuntu/airflow_venv/lib/python3.8/site-packages/airflow/jobs/scheduler_job_runner.py", line 843, in _execute
+    self._run_scheduler_loop()
+  File "/home/ubuntu/airflow_venv/lib/python3.8/site-packages/airflow/jobs/scheduler_job_runner.py", line 972, in _run_scheduler_loop
+    self.processor_agent.wait_until_finished()
+  File "/home/ubuntu/airflow_venv/lib/python3.8/site-packages/airflow/dag_processing/manager.py", line 206, in wait_until_finished
+    result = self._parent_signal_conn.recv()
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 414, in _recv_bytes
+    buf = self._recv(4)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 379, in _recv
+    chunk = read(handle, remaining)
+ConnectionResetError: [Errno 104] Connection reset by peer
+2024-06-29 04:35:15,063 INFO - Sending Signals.SIGTERM to group 35532. PIDs of all processes in the group: []
+2024-06-29 04:35:15,063 INFO - Sending the signal Signals.SIGTERM to group 35532
+2024-06-29 04:35:15,064 INFO - Sending the signal Signals.SIGTERM to process 35532 as process group is missing.
+2024-06-29 04:35:15,064 INFO - Exited execute loop

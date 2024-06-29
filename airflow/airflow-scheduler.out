@@ -1,0 +1,27 @@
+[[34m2024-06-29T04:35:14.762+0000[0m] {[34mtask_context_logger.py:[0m63} INFO[0m - Task context logging is enabled[0m
+[[34m2024-06-29T04:35:14.763+0000[0m] {[34mexecutor_loader.py:[0m235} INFO[0m - Loaded executor: SequentialExecutor[0m
+[[34m2024-06-29T04:35:14.856+0000[0m] {[34mscheduler_job_runner.py:[0m796} INFO[0m - Starting the scheduler[0m
+[[34m2024-06-29T04:35:14.857+0000[0m] {[34mscheduler_job_runner.py:[0m803} INFO[0m - Processing each file at most -1 times[0m
+[[34m2024-06-29T04:35:14.865+0000[0m] {[34mmanager.py:[0m170} INFO[0m - Launched DagFileProcessorManager with pid: 35532[0m
+[[34m2024-06-29T04:35:14.866+0000[0m] {[34mscheduler_job_runner.py:[0m1595} INFO[0m - Adopting or resetting orphaned tasks for active dag runs[0m
+[[34m2024-06-29T04:35:14.872+0000[0m] {[34msettings.py:[0m60} INFO[0m - Configured default timezone Timezone('UTC')[0m
+[2024-06-29T04:35:14.898+0000] {manager.py:393} WARNING - Because we cannot use more than 1 thread (parsing_processes = 2) when using sqlite. So we set parallelism to 1.
+[[34m2024-06-29T04:35:15.054+0000[0m] {[34mscheduler_job_runner.py:[0m860} ERROR[0m - Exception when executing SchedulerJob._run_scheduler_loop[0m
+Traceback (most recent call last):
+  File "/home/ubuntu/airflow_venv/lib/python3.8/site-packages/airflow/jobs/scheduler_job_runner.py", line 843, in _execute
+    self._run_scheduler_loop()
+  File "/home/ubuntu/airflow_venv/lib/python3.8/site-packages/airflow/jobs/scheduler_job_runner.py", line 972, in _run_scheduler_loop
+    self.processor_agent.wait_until_finished()
+  File "/home/ubuntu/airflow_venv/lib/python3.8/site-packages/airflow/dag_processing/manager.py", line 206, in wait_until_finished
+    result = self._parent_signal_conn.recv()
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 414, in _recv_bytes
+    buf = self._recv(4)
+  File "/usr/lib/python3.8/multiprocessing/connection.py", line 379, in _recv
+    chunk = read(handle, remaining)
+ConnectionResetError: [Errno 104] Connection reset by peer[0m
+[[34m2024-06-29T04:35:15.063+0000[0m] {[34mprocess_utils.py:[0m132} INFO[0m - Sending Signals.SIGTERM to group 35532. PIDs of all processes in the group: [][0m
+[[34m2024-06-29T04:35:15.063+0000[0m] {[34mprocess_utils.py:[0m87} INFO[0m - Sending the signal Signals.SIGTERM to group 35532[0m
+[[34m2024-06-29T04:35:15.064+0000[0m] {[34mprocess_utils.py:[0m101} INFO[0m - Sending the signal Signals.SIGTERM to process 35532 as process group is missing.[0m
+[[34m2024-06-29T04:35:15.064+0000[0m] {[34mscheduler_job_runner.py:[0m872} INFO[0m - Exited execute loop[0m
