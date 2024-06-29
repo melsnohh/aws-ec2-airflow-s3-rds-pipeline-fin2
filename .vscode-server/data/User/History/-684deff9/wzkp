@@ -1,0 +1,5 @@
+.aws
+.ssh
+.psql_history
+.gitignore
+logs

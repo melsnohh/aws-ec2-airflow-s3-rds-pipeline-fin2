@@ -1,0 +1,6 @@
+.aws
+.ssh
+.psql_history
+.gitignore
+logs
+airflow.db
