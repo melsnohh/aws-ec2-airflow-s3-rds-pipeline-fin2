@@ -1,14 +1,11 @@
-Listening on 127.0.0.1:45429
-[2024-06-30 03:41:44] info Disposed of connection to running server.
-looking for token 79bc9409-d790-480e-9c9a-0ca360eec01f, got Some("79bc9409-d790-480e-9c9a-0ca360eec01f")
-[2024-06-30 03:41:44] info Checking /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/log.txt and /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/pid.txt for a running server...
-[2024-06-30 03:41:44] info Found running server (pid=1141)
-[2024-06-30 03:41:54] info Disposed of connection to running server.
-[2024-06-30 03:41:54] info Disposed of connection to running server.
-looking for token 79bc9409-d790-480e-9c9a-0ca360eec01f, got Some("79bc9409-d790-480e-9c9a-0ca360eec01f")
-[2024-06-30 03:41:54] info Checking /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/log.txt and /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/pid.txt for a running server...
-[2024-06-30 03:41:54] info Found running server (pid=1141)
-[2024-06-30 04:17:46] info Disposed of connection to running server.
-looking for token 79bc9409-d790-480e-9c9a-0ca360eec01f, got Some("79bc9409-d790-480e-9c9a-0ca360eec01f")
-[2024-06-30 04:17:46] info Checking /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/log.txt and /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/pid.txt for a running server...
-[2024-06-30 04:17:46] info Found running server (pid=1141)
+Listening on 127.0.0.1:34175
+[2024-06-30 05:05:57] info Disposed of connection to running server.
+looking for token 76153a3b-a9fa-4be9-ac41-47a906d14a39, got Some("76153a3b-a9fa-4be9-ac41-47a906d14a39")
+[2024-06-30 05:05:58] info Checking /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/log.txt and /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/pid.txt for a running server...
+[2024-06-30 05:05:58] info Starting server...
+[2024-06-30 05:06:03] info Server started
+[2024-06-30 05:06:11] info Disposed of connection to running server.
+[2024-06-30 05:06:12] info Disposed of connection to running server.
+looking for token 76153a3b-a9fa-4be9-ac41-47a906d14a39, got Some("76153a3b-a9fa-4be9-ac41-47a906d14a39")
+[2024-06-30 05:06:12] info Checking /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/log.txt and /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/pid.txt for a running server...
+[2024-06-30 05:06:12] info Found running server (pid=1439)
