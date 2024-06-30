@@ -1,21 +1,23 @@
 from airflow import DAG
 from datetime import timedelta, datetime
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.utils.task_group import TaskGroup
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.http.sensors.http import HttpSensor
 import json
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.operators.python import PythonOperator
 import pandas as pd
-
-
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 
 
 def kelvin_to_fahrenheit(temp_in_kelvin):
     temp_in_fahrenheit = (temp_in_kelvin - 273.15) * (9/5) + 32
-    return temp_in_fahrenheit
-
+    return round(temp_in_fahrenheit, 3)
 
 def transform_load_data(task_instance):
-    data = task_instance.xcom_pull(task_ids="extract_weather_data")
+    data = task_instance.xcom_pull(task_ids="group_a.tsk_extract_houston_weather_data")
+    
     city = data["name"]
     weather_description = data["weather"][0]['description']
     temp_farenheit = kelvin_to_fahrenheit(data["main"]["temp"])
@@ -29,29 +31,41 @@ def transform_load_data(task_instance):
     sunrise_time = datetime.utcfromtimestamp(data['sys']['sunrise'] + data['timezone'])
     sunset_time = datetime.utcfromtimestamp(data['sys']['sunset'] + data['timezone'])
 
-    transformed_data = {"City": city,
-                        "Description": weather_description,
-                        "Temperature (F)": temp_farenheit,
-                        "Feels Like (F)": feels_like_farenheit,
-                        "Minimun Temp (F)":min_temp_farenheit,
-                        "Maximum Temp (F)": max_temp_farenheit,
-                        "Pressure": pressure,
-                        "Humidty": humidity,
-                        "Wind Speed": wind_speed,
-                        "Time of Record": time_of_record,
-                        "Sunrise (Local Time)":sunrise_time,
-                        "Sunset (Local Time)": sunset_time                        
+    transformed_data = {"city": city,
+                        "description": weather_description,
+                        "temperature_farenheit": temp_farenheit,
+                        "feels_like_farenheit": feels_like_farenheit,
+                        "minimun_temp_farenheit":min_temp_farenheit,
+                        "maximum_temp_farenheit": max_temp_farenheit,
+                        "pressure": pressure,
+                        "humidity": humidity,
+                        "wind_speed": wind_speed,
+                        "time_of_record": time_of_record,
+                        "sunrise_local_time)":sunrise_time,
+                        "sunset_local_time)": sunset_time                        
                         }
     transformed_data_list = [transformed_data]
     df_data = pd.DataFrame(transformed_data_list)
-    aws_credentials = {"key": "ASIAVRUVWSBOOKXJQQWA",
-                        "secret": "BpUPiJMmTddQJwIIUq/Re92MNc2EZyv40bbNBRvV",
-                          "token": "FwoGZXIvYXdzEHkaDO3qp/QT6BJi3g+SHiKCAV5q/6bO266oyVnZMuUCP9FtQhFR6KriZHE2wBaG2NChR5WPcofylbNdxIeS6Ys66vXnIpsUhTwPU7dK+gCgJB0Yi7ExbK7DbYYQywB2GEZyfJGPIiweKjulX2XRs2v7jE+EmhatpZEe7t4AX9eOglnOMnDiE/kdpcYKW5x0dUXJoMwo34L9swYyKKBn9/s1sgFQETIZw+dmisOIy4h5JG9VXEg7qmiOUzGkZDx6qZ6dFKs="}
+    
+    df_data.to_csv("current_weather_data.csv", index=False, header=False)
 
+
+def load_weather():
+    hook = PostgresHook(postgres_conn_id= 'postgres_conn')
+    hook.copy_expert(
+        sql= "COPY weather_data FROM stdin WITH DELIMITER as ','",
+        filename='current_weather_data.csv'
+    )
+
+def save_joined_data_s3(task_instance):
+    data = task_instance.xcom_pull(task_ids="task_join_data")
+    df = pd.DataFrame(data, columns = ['city', 'description', 'temperature_farenheit', 'feels_like_farenheit', 'minimun_temp_farenheit', 'maximum_temp_farenheit', 'pressure','humidity', 'wind_speed', 'time_of_record', 'sunrise_local_time', 'sunset_local_time', 'state', 'census_2020', 'land_area_sq_mile_2020'])
+    # df.to_csv("joined_weather_data.csv", index=False)
     now = datetime.now()
     dt_string = now.strftime("%d%m%Y%H%M%S")
-    dt_string = 'current_weather_data_portland_' + dt_string
-    df_data.to_csv(f"s3://weatherapiairflowmsnoh/{dt_string}.csv", index=False, storage_options=aws_credentials)
+    dt_string = 'joined_weather_data_' + dt_string
+    df.to_csv(f"s3://weatherapiairflowmsnoh/{dt_string}.csv", index=False)
+
 
 
 
@@ -62,40 +76,100 @@ default_args = {
     'email': ['myemail@domain.com'],
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 2,
-    'retry_delay': timedelta(minutes=2)
+    'retries': 0,
+    'retry_delay': timedelta(seconds=20)
 }
 
 
-
-with DAG('weather_dag',
+with DAG('weather_dag_2',
         default_args=default_args,
         schedule_interval = '@daily',
         catchup=False) as dag:
-
-
-        is_weather_api_ready = HttpSensor(
-        task_id ='is_weather_api_ready',
-        http_conn_id='weathermap_api',
-        endpoint='data/2.5/weather?q=Portland&appid=d867854231cf720bd9947f8d82816209'
+    
+        start_pipeline = DummyOperator(
+            task_id = 'tsk_start_pipeline'
         )
 
 
-        extract_weather_data = SimpleHttpOperator(
-        task_id = 'extract_weather_data',
-        http_conn_id = 'weathermap_api',
-        endpoint='/data/2.5/weather?q=Portland&appid=d867854231cf720bd9947f8d82816209',
-        method = 'GET',
-        response_filter= lambda r: json.loads(r.text),
-        log_response=True
-        )
+        with TaskGroup(group_id = 'group_a', tooltip= "Extract_from_S3_and_weatherapi") as group_A:
+            create_table_1 = PostgresOperator(
+                task_id='tsk_create_table_1',
+                postgres_conn_id = "postgres_conn",
+                sql= '''  
+                    CREATE TABLE IF NOT EXISTS city_look_up (
+                    city TEXT NOT NULL,
+                    state TEXT NOT NULL,
+                    census_2020 numeric NOT NULL,
+                    land_Area_sq_mile_2020 numeric NOT NULL                    
+                );
+                '''
+            )
 
-        transform_load_weather_data = PythonOperator(
-        task_id= 'transform_load_weather_data',
-        python_callable=transform_load_data
-        )
+            truncate_table = PostgresOperator(
+                task_id='tsk_truncate_table',
+                postgres_conn_id = "postgres_conn",
+                sql= ''' TRUNCATE TABLE city_look_up;
+                    '''
+            )
+
+            uploadS3_to_postgres  = PostgresOperator(
+                task_id = "tsk_uploadS3_to_postgres",
+                postgres_conn_id = "postgres_conn",
+                sql = "SELECT aws_s3.table_import_from_s3('city_look_up', '', '(format csv, DELIMITER '','', HEADER true)', 'weatherapiairflowmsnoh', 'us_city.csv', 'us-east-1');"
+            )
+
+            create_table_2 = PostgresOperator(
+                task_id='tsk_create_table_2',
+                postgres_conn_id = "postgres_conn",
+                sql= ''' 
+                    CREATE TABLE IF NOT EXISTS weather_data (
+                    city TEXT,
+                    description TEXT,
+                    temperature_farenheit NUMERIC,
+                    feels_like_farenheit NUMERIC,
+                    minimun_temp_farenheit NUMERIC,
+                    maximum_temp_farenheit NUMERIC,
+                    pressure NUMERIC,
+                    humidity NUMERIC,
+                    wind_speed NUMERIC,
+                    time_of_record TIMESTAMP,
+                    sunrise_local_time TIMESTAMP,
+                    sunset_local_time TIMESTAMP                    
+                );
+                '''
+            )
+
+            is_portland_weather_api_ready = HttpSensor(
+                task_id ='tsk_is_houston_weather_api_ready',
+                http_conn_id='weathermap_api',
+                endpoint='data/2.5/weather?q=Portland&appid=d867854231cf720bd9947f8d82816209'
+            )
+
+
+            extract_portland_weather_data = SimpleHttpOperator(
+                task_id = 'tsk_extract_houston_weather_data',
+                http_conn_id = 'weathermap_api',
+                endpoint='data/2.5/weather?q=Portland&appid=d867854231cf720bd9947f8d82816209',
+                method = 'GET',
+                response_filter= lambda r: json.loads(r.text),
+                log_response=True
+            )
+
+            transform_load_portland_weather_data = PythonOperator(
+                task_id= 'transform_load_houston_weather_data',
+                python_callable=transform_load_data
+            )
+
+            load_weather_data = PythonOperator(
+                task_id= 'tsk_load_weather_data',
+                python_callable=load_weather
+            )
 
 
 
 
-        is_weather_api_ready >> extract_weather_data >> transform_load_weather_data
+            create_table_1 >> truncate_table >> uploadS3_to_postgres
+            create_table_2 >> extract_portland_weather_data >> transform_load_portland_weather_data >> load_weather_data
+        start_pipeline >> group_A 
+
+
