@@ -31,5 +31,5 @@ BROWSER=/home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b15
 PATH=/home/ubuntu/.vscode-server/extensions/ms-python.python-2024.8.1/python_files/deactivate/bash:/home/ubuntu/airflow_venv/bin:/home/ubuntu/.vscode-server/extensions/ms-python.python-2024.8.1/python_files/deactivate/bash:/home/ubuntu/airflow_venv/bin:/home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/server/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
 TERM_PROGRAM=vscode
-VSCODE_IPC_HOOK_CLI=/run/user/1000/vscode-ipc-e75f9c73-49e0-47cf-b3c4-051d3c1c842a.sock
+VSCODE_IPC_HOOK_CLI=/run/user/1000/vscode-ipc-6b02f2ef-4df4-4aa8-8e06-2c04d0dfb16c.sock
 _=/usr/bin/python3

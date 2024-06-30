@@ -16,7 +16,7 @@ def kelvin_to_fahrenheit(temp_in_kelvin):
     return round(temp_in_fahrenheit, 3)
 
 def transform_load_data(task_instance):
-    data = task_instance.xcom_pull(task_ids="group_a.tsk_extract_houston_weather_data")
+    data = task_instance.xcom_pull(task_ids="group_a.tsk_extract_portland_weather_data")
     
     city = data["name"]
     weather_description = data["weather"][0]['description']
@@ -90,6 +90,41 @@ with DAG('weather_dag_2',
             task_id = 'tsk_start_pipeline'
         )
 
+        join_data = PostgresOperator(
+                task_id='task_join_data',
+                postgres_conn_id = "postgres_conn",
+                sql= '''SELECT 
+                    w.city,                    
+                    description,
+                    temperature_farenheit,
+                    feels_like_farenheit,
+                    minimun_temp_farenheit,
+                    maximum_temp_farenheit,
+                    pressure,
+                    humidity,
+                    wind_speed,
+                    time_of_record,
+                    sunrise_local_time,
+                    sunset_local_time,
+                    state,
+                    census_2020,
+                    land_area_sq_mile_2020                    
+                    FROM weather_data w
+                    INNER JOIN city_look_up c
+                        ON w.city = c.city                                      
+                ;
+                '''
+            )
+
+        load_joined_data = PythonOperator(
+            task_id= 'task_load_joined_data',
+            python_callable=save_joined_data_s3
+            )
+        
+        end_pipeline = DummyOperator(
+                task_id = 'task_end_pipeline'
+             )
+
 
         with TaskGroup(group_id = 'group_a', tooltip= "Extract_from_S3_and_weatherapi") as group_A:
             create_table_1 = PostgresOperator(
@@ -140,23 +175,23 @@ with DAG('weather_dag_2',
             )
 
             is_portland_weather_api_ready = HttpSensor(
-                task_id ='tsk_is_houston_weather_api_ready',
+                task_id ='tsk_is_portland_weather_api_ready',
                 http_conn_id='weathermap_api',
-                endpoint='data/2.5/weather?q=Portland&appid=d867854231cf720bd9947f8d82816209'
+                endpoint='data/2.5/weather?q=Chicago&appid=d867854231cf720bd9947f8d82816209'
             )
 
 
             extract_portland_weather_data = SimpleHttpOperator(
-                task_id = 'tsk_extract_houston_weather_data',
+                task_id = 'tsk_extract_portland_weather_data',
                 http_conn_id = 'weathermap_api',
-                endpoint='data/2.5/weather?q=Portland&appid=d867854231cf720bd9947f8d82816209',
+                endpoint='data/2.5/weather?q=Chicago&appid=d867854231cf720bd9947f8d82816209',
                 method = 'GET',
                 response_filter= lambda r: json.loads(r.text),
                 log_response=True
             )
 
             transform_load_portland_weather_data = PythonOperator(
-                task_id= 'transform_load_houston_weather_data',
+                task_id= 'transform_load_portland_weather_data',
                 python_callable=transform_load_data
             )
 
@@ -169,7 +204,7 @@ with DAG('weather_dag_2',
 
 
             create_table_1 >> truncate_table >> uploadS3_to_postgres
-            create_table_2 >> extract_portland_weather_data >> transform_load_portland_weather_data >> load_weather_data
-        start_pipeline >> group_A 
+            create_table_2 >> is_portland_weather_api_ready >> extract_portland_weather_data >> transform_load_portland_weather_data >> load_weather_data
+        start_pipeline >>  group_A >> join_data >> load_joined_data >> end_pipeline
 
 
