@@ -8,3 +8,7 @@ looking for token 79bc9409-d790-480e-9c9a-0ca360eec01f, got Some("79bc9409-d790-
 looking for token 79bc9409-d790-480e-9c9a-0ca360eec01f, got Some("79bc9409-d790-480e-9c9a-0ca360eec01f")
 [2024-06-30 03:41:54] info Checking /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/log.txt and /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/pid.txt for a running server...
 [2024-06-30 03:41:54] info Found running server (pid=1141)
+[2024-06-30 04:17:46] info Disposed of connection to running server.
+looking for token 79bc9409-d790-480e-9c9a-0ca360eec01f, got Some("79bc9409-d790-480e-9c9a-0ca360eec01f")
+[2024-06-30 04:17:46] info Checking /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/log.txt and /home/ubuntu/.vscode-server/cli/servers/Stable-5437499feb04f7a586f677b155b039bc2b3669eb/pid.txt for a running server...
+[2024-06-30 04:17:46] info Found running server (pid=1141)

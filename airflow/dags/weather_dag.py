@@ -177,14 +177,14 @@ with DAG('weather_dag_2',
             is_portland_weather_api_ready = HttpSensor(
                 task_id ='tsk_is_portland_weather_api_ready',
                 http_conn_id='weathermap_api',
-                endpoint='data/2.5/weather?q=Chicago&appid=d867854231cf720bd9947f8d82816209'
+                endpoint='data/2.5/weather?q=Philadelphia&appid=d867854231cf720bd9947f8d82816209'
             )
 
 
             extract_portland_weather_data = SimpleHttpOperator(
                 task_id = 'tsk_extract_portland_weather_data',
                 http_conn_id = 'weathermap_api',
-                endpoint='data/2.5/weather?q=Chicago&appid=d867854231cf720bd9947f8d82816209',
+                endpoint='data/2.5/weather?q=Philadelphia&appid=d867854231cf720bd9947f8d82816209',
                 method = 'GET',
                 response_filter= lambda r: json.loads(r.text),
                 log_response=True
